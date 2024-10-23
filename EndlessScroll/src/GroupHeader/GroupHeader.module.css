@@ -1,0 +1,28 @@
+.groups {
+  display: flex;
+  font-size: 20px;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  padding: 10px 0px;
+  scrollbar-width: none;
+  background: #202225;
+}
+
+.groupList {
+  display: flex;
+}
+
+.group {
+  white-space: nowrap;
+  padding: 5px;
+}
+
+.groupContent {
+  padding: 7px 18px;
+  font-size: 14px;
+  background: #2f3136;
+  color: #b9bbbe;
+  font-family: Arial;
+  border-radius: 100000px;
+  border: 0px;
+}
