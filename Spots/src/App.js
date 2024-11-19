@@ -62,7 +62,7 @@ class Table {
         new Table(
           this.getSwap(i, j, i, j - 1),
           this.h + 1,
-          this.name + "-1",
+          this.name + " ←",
           iter,
           this
         )
@@ -72,7 +72,7 @@ class Table {
         new Table(
           this.getSwap(i, j, i - 1, j),
           this.h + 1,
-          this.name + "-2",
+          this.name + " ↑",
           iter,
           this
         )
@@ -82,7 +82,7 @@ class Table {
         new Table(
           this.getSwap(i, j, i, j + 1),
           this.h + 1,
-          this.name + "-3",
+          this.name + " →",
           iter,
           this
         )
@@ -92,7 +92,7 @@ class Table {
         new Table(
           this.getSwap(i, j, i + 1, j),
           this.h + 1,
-          this.name + "-4",
+          this.name + " ↓",
           iter,
           this
         )
@@ -106,7 +106,7 @@ const tableService = (table, iter = 10) => {
   let tables = [table];
   let i = 0;
   let ans = undefined;
-  const func = (g, h) => 1000 * g + h;
+  const func = (g, h) => 20 * g + h;
   while (i < iter) {
     let cur = tables[0];
     for (let i = 1; i < tables.length; i++)
@@ -137,7 +137,7 @@ const DrawTable = ({ table }) => {
         <tr>
           <td style={{ fontSize: "10px", background: color }} colSpan={3}>
             <div>{`i=${table.i}; g=${table.g};`}</div>
-            <div>{`name=${table.name}`}</div>
+            <div>{`${table.name}`}</div>
           </td>
         </tr>
       </tbody>
@@ -155,6 +155,7 @@ const DrawTables = ({ table }) => {
     tables.push(newRow);
   }
   tables = [[table], ...tables];
+  tables = tables.filter((table) => table.length !== 0);
   const lines = [];
   for (let i = 0; i < tables.length - 1; i++) {
     const l = [];
@@ -165,31 +166,45 @@ const DrawTables = ({ table }) => {
     }
     lines.push(l);
   }
+  console.log(tables);
   return (
     <div>
+      <div>
+        Общее число таблиц:{" "}
+        {tables.reduce((acc, table) => acc + table.length, 0)}
+      </div>
+      <div>Количество слоев: {tables.length + 1}</div>
+      <div>Количество генераций новых таблиц (i): {tables[tables.length - 1][0].i}</div>
+      <div>Формула: f(g, h) = 20 * g + h</div>
       {tables.map((tbs, index) => (
-        <div key={index}>
+        <div
+          key={index}
+          style={{ display: "flex", alignItems: "center", gap: "30px" }}
+        >
+          <span>{index + 1}</span>
           <div>
-            <svg
-              height={"50px"}
-              viewBox={`0 0 10000 50`}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {(index === 0 ? [] : lines[index - 1]).map((l) => (
-                <line
-                  x1={`${32 + l[0] * 63}`}
-                  y1="0"
-                  x2={`${32 + l[1] * 63}`}
-                  y2="50"
-                  stroke="black"
-                />
+            <div>
+              <svg
+                height={"50px"}
+                viewBox={`0 0 10000 50`}
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {(index === 0 ? [] : lines[index - 1]).map((l) => (
+                  <line
+                    x1={`${32 + l[0] * 63}`}
+                    y1="0"
+                    x2={`${32 + l[1] * 63}`}
+                    y2="50"
+                    stroke="black"
+                  />
+                ))}
+              </svg>
+            </div>
+            <div style={{ display: "flex" }}>
+              {tbs.map((table, i) => (
+                <DrawTable key={i} table={table} />
               ))}
-            </svg>
-          </div>
-          <div style={{ display: "flex" }}>
-            {tbs.map((table, i) => (
-              <DrawTable key={i} table={table} />
-            ))}
+            </div>
           </div>
         </div>
       ))}
@@ -209,7 +224,7 @@ const App = () => {
     [6, 5, 4],
     [3, 2, 1],
   ];
-  const start = new Table(startTable, 0, "t");
+  const start = new Table(startTable, 0, "");
   console.log(tableService(start, 1000));
   return (
     <div>
