@@ -111,6 +111,7 @@ const tableService = (table, iter = 10) => {
     let cur = tables[0];
     for (let i = 1; i < tables.length; i++)
       if (func(tables[i].g, tables[i].h) < func(cur.g, cur.h)) cur = tables[i];
+    console.log(Math.random(), cur.g, cur.i)
     const next = cur.getNext(i + 1);
     ans = next.find((el) => el.g === 0);
     tables.push(...next);
@@ -120,7 +121,7 @@ const tableService = (table, iter = 10) => {
   }
 };
 
-const DrawTable = ({ table }) => {
+const DrawTable = ({ table, numb = 0 }) => {
   const color = `#${`${999999 - 1444 * table.i}`.padStart(6, "0")}`;
   return (
     <table style={{ background: color }}>
@@ -136,6 +137,7 @@ const DrawTable = ({ table }) => {
         ))}
         <tr>
           <td style={{ fontSize: "10px", background: color }} colSpan={3}>
+            <div>{`КПД: ${(100 * (numb - 1) / table.i).toFixed(2)}%`}</div>
             <div>{`i=${table.i}; g=${table.g};`}</div>
             <div>{`${table.name}`}</div>
           </td>
@@ -202,7 +204,7 @@ const DrawTables = ({ table }) => {
             </div>
             <div style={{ display: "flex" }}>
               {tbs.map((table, i) => (
-                <DrawTable key={i} table={table} />
+                <DrawTable key={i} table={table} numb={index + 1} />
               ))}
             </div>
           </div>
