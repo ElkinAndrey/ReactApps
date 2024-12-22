@@ -73,6 +73,8 @@ const getBestNode = (mas, values) => {
       values[node] + 1,
       values[values.length - 1] + 1
     );
+    if (mas.length === 3 && mas[0][2] === 5) console.log(mas);
+    if (mas.length === 3 && mas[0][2] === 5) console.log(counts);
     for (let i = 0; i < mas.length; i++) {
       counts[mas[i][node]][mas[i][values.length - 1]] += 1;
     }
@@ -80,13 +82,14 @@ const getBestNode = (mas, values) => {
     for (let i = 0; i < counts.length; i++) {
       const sum = sumArray(counts[i]);
       for (let j = 0; j < counts[i].length; j++) {
-        if (counts[i][j] === 0) break;
+        if (counts[i][j] === 0) continue;
         bits[i] -= Math.log2(counts[i][j] / sum);
       }
     }
+    if (mas.length === 3 && mas[0][2] === 5) console.log(bits);
     array[node] = sumArray(bits);
   }
-  return minIndex(array);
+  return array;
 };
 
 class NodeTree {
@@ -96,7 +99,8 @@ class NodeTree {
     this.parent = parent;
     this.value = value;
     if (productivity.length > 1) {
-      this.bestNodeIndex = getBestNode(productivity, values);
+      this.array = getBestNode(productivity, values);
+      this.bestNodeIndex = minIndex(this.array);
       const arrays = cutArray(productivity, values, this.bestNodeIndex);
       const newValues = deleteItemArray(values, this.bestNodeIndex);
       this.nodes = arrays.map(
@@ -119,61 +123,70 @@ class NodeTree {
     }
     return index;
   }
+
+  getIndexes() {
+    if (this.parent === null) {
+      const mas = [];
+      for (let i = 0; i < this.values.length - 1; i++) mas.push(i);
+      return mas;
+    }
+    const ind = this.parent.getIndex();
+    return this.parent.getIndexes().filter((a) => a !== ind);
+  }
 }
 
 const DrawNode = ({ node }) => {
   return (
-    <div
-      style={{
-        display: "inline-block",
-        margin: "10px",
-      }}
-    >
-      {node.value !== null && (
-        <div>{`${params[node.parent.getIndex()][node.value]}`}</div>
-      )}
-      <div
-        style={{
-          display: "inline-block",
-          border: "1px solid red",
-        }}
-      >
-        <div
-          style={{
-            display: "inline-block",
-            margin: "10px",
-          }}
-        >
-          <div
-            style={{
-              display: "inline-block",
-              border: "5px solid black",
-            }}
-          >
-            {node.getIndex() !== -1 && (
-              <div style={{ fontSize: "36px", marginBottom: "10px" }}>{`${
-                th[node.getIndex()]
-              }`}</div>
-            )}
-            <div style={{ whiteSpace: "nowrap" }}>
-              {(node.productivity ?? [])
-                .map(
-                  (p) =>
-                    `${params[params.length - 1][p[p.length - 2]]} (№${
-                      p[p.length - 1]
-                    })`
-                )
-                .join(", ")}
-            </div>
+    <div>
+      <div style={{ display: "inline-block", border: "5px solid black" }}>
+        {node.getIndex() !== -1 && (
+          <div>
+            <div style={{ fontSize: "36px", marginBottom: "10px" }}>{`${
+              th[node.getIndex()]
+            }`}</div>
+            <b>Неопределенности</b>
+            {(node.getIndexes() ?? []).map((i, index) => (
+              <div key={index}>
+                {th[i]}: {node.array[index].toFixed(2)}
+              </div>
+            ))}
+            <br />
           </div>
+        )}
+        {/* <div>{`${(node.array ?? []).map((a) => a.toFixed(2)).join(", ")} (${(
+          node.getIndexes() ?? []
+        ).join(", ")})`}</div> */}
+        <div style={{ whiteSpace: "nowrap" }}>
+          {(node.productivity ?? [])
+            .map(
+              (p) =>
+                `${params[params.length - 1][p[p.length - 2]]} (№${
+                  p[p.length - 1]
+                })`
+            )
+            .join(", ")}
         </div>
-        <div style={{ display: "flex" }}>
-          {(node.nodes ?? []).map((n, index) => (
-            <div key={index}>
-              <DrawNode node={n} />
+      </div>
+      <div style={{ display: "flex" }}>
+        {(node.nodes ?? []).map((n, index) => (
+          <div key={index} style={{ marginRight: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <svg
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ height: "100px" }}
+              >
+                <line x1="35" y1="70" x2="50" y2="100" stroke="black" />
+                <line x1="0" y1="0" x2="25" y2="50" stroke="black" />
+                <text x="0" y="65" fontSize={"18px"}>
+                  {`${params[n.parent.getIndex()][n.value]}`}
+                </text>
+              </svg>
+              {/* <div>{`${params[n.parent.getIndex()][n.value]}`}</div> */}
             </div>
-          ))}
-        </div>
+            <DrawNode node={n} />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -231,11 +244,7 @@ const App = () => {
     [2, 1, 1, 1, 2, 19],
   ];
 
-  // console.log(getBestNode(productivity, values));
-  // cutArray(productivity, values, 0);
-
   const node = new NodeTree(productivity, values);
-  console.log(node);
 
   return (
     <div>
